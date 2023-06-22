@@ -22,7 +22,7 @@ export default class NewBill {
     const fileName = filePath[filePath.length - 1]
 
     // vérifie l'extension du fichier
-    const fileExtension = fileName.split('.').pop().toLowerCase() // extrait l'extension du fichier
+    const fileExtension = fileName.split('.').pop().toLowerCase() // isolel'extension du fichier
     const extensionsAcceptes = ['jpg', 'jpeg', 'png'] // liste des extensions autorisées
     if (!extensionsAcceptesxtensions.includes(fileExtension)) {
       alert('Format de fichier invalide. Veuillez télécharger un fichier au format jpg, jpeg ou png.') // affiche un message d'erreur si l'extension n'est pas autorisée
