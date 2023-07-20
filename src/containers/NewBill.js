@@ -17,39 +17,40 @@ export default class NewBill {
   }
   handleChangeFile = e => {
     e.preventDefault()
-    const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
-    const filePath = e.target.value.split(/\\/g)
-    const fileName = filePath[filePath.length - 1]
-
-    // vérifie l'extension du fichier
-    const fileExtension = fileName.split('.').pop().toLowerCase() // isolel'extension du fichier
-    const extensionsAcceptes = ['jpg', 'jpeg', 'png'] // liste des extensions autorisées
-    if (!extensionsAcceptes.includes(fileExtension)) {
-      alert('Format de fichier invalide. Veuillez télécharger un fichier au format jpg, jpeg ou png.') // affiche un message d'erreur si l'extension n'est pas autorisée
-      // Efface le contenu du champ de fichier si l'extension n'est pas autorisée
-      this.document.querySelector(`input[data-testid="file"]`).value = ''
-      return // empêche la soumission du formulaire
-    }
-
+    const input = this.document.querySelector(`input[data-testid="file"]`)
+    const errorMessage = this.document.querySelector(".file-error")
+    const file = input.files[0]
+    const filePath = input.value.split(/\\/g)
+    let fileName = filePath[filePath.length-1]
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
-    formData.append('file', file)
-    formData.append('email', email)
 
-    this.store
-      .bills()
-      .create({
-        data: formData,
-        headers: {
-          noContentType: true
-        }
-      })
-      .then(({ fileUrl, key }) => {
-        console.log(fileUrl)
-        this.billId = key
-        this.fileUrl = fileUrl
-        this.fileName = fileName
-      }).catch(error => console.error(error))
+    if (file.type !== 'image/png' && file.type !== 'image/jpeg') {
+        errorMessage.classList.add("visible")
+        input.value = ''
+        return
+    } else {
+        errorMessage.classList.remove("visible")
+        formData.append("file", file);
+		formData.append("email", email);
+        this.store
+        .bills()
+        .create({
+            data: formData,
+            headers: {
+                noContentType: true
+            }
+        })
+        .then(
+            ({fileUrl, key}) => {
+                this.billId = key
+                this.fileUrl = fileUrl
+                this.fileName = fileName
+            }
+        ).catch(
+            error => console.error(error)
+        )
+    }
   }
   handleSubmit = e => {
     e.preventDefault()
@@ -58,9 +59,9 @@ export default class NewBill {
     const bill = {
       email,
       type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
-      name: e.target.querySelector(`input[data-testid="expense-name"]`).value,
+      name:  e.target.querySelector(`input[data-testid="expense-name"]`).value,
       amount: parseInt(e.target.querySelector(`input[data-testid="amount"]`).value),
-      date: e.target.querySelector(`input[data-testid="datepicker"]`).value,
+      date:  e.target.querySelector(`input[data-testid="datepicker"]`).value,
       vat: e.target.querySelector(`input[data-testid="vat"]`).value,
       pct: parseInt(e.target.querySelector(`input[data-testid="pct"]`).value) || 20,
       commentary: e.target.querySelector(`textarea[data-testid="commentary"]`).value,
@@ -71,6 +72,7 @@ export default class NewBill {
     this.updateBill(bill)
     this.onNavigate(ROUTES_PATH['Bills'])
   }
+
 
   // not need to cover this function by tests
   updateBill = (bill) => {
